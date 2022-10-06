@@ -438,7 +438,7 @@ static bool is_probably_jdk11_with_tls13(const SSL_CLIENT_HELLO *client_hello) {
       {TLSEXT_TYPE_psk_key_exchange_modes, true},
       {TLSEXT_TYPE_key_share, true},
       {TLSEXT_TYPE_renegotiate, false},
-      {TLSEXT_TYPE_pre_shared_key, true},
+      {TLSEXT_TYPE_pre_shared_key, false},
   };
   Span<const uint8_t> sigalgs, sigalgs_cert;
   bool has_status_request = false, has_status_request_v2 = false;
