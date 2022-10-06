@@ -3346,10 +3346,33 @@ static bool ssl_add_clienthello_tlsext_inner(SSL_HANDSHAKE *hs, CBB *out,
     }
   }
 
-  for (size_t unpermuted = 0; unpermuted < kNumExtensions; unpermuted++) {
-    size_t i = hs->extension_permutation.empty()
+    size_t len = kNumExtensions; 
+  size_t custom_len = ssl->config->enable_extensions.size();
+  /**
+   *  如果custom_len>0 说明有设置，使用新逻辑。
+   *  for_size 循环次数
+   */
+  size_t for_size = custom_len > 0 ? custom_len:len;
+
+  for (size_t unpermuted = 0; unpermuted < for_size; unpermuted++) {
+    size_t i = unpermuted;
+    // 如果custom_len > 0  说明需要自定义顺序实现指定jar3指纹
+    if( custom_len > 0 ) {
+      unsigned ext_index;
+      const struct tls_extension *const ext =
+      tls_extension_find(&ext_index, ssl->config->enable_extensions[unpermuted]);
+      if (ext == NULL) {
+        // 没有找到这个扩展
+        continue;
+      }
+      i = ext_index;      
+    } else {
+      // 判断是否使用随机顺序
+      i = hs->extension_permutation.empty()
                    ? unpermuted
                    : hs->extension_permutation[unpermuted];
+    }
+    
     const size_t len_before = CBB_len(&extensions);
     const size_t len_compressed_before = CBB_len(compressed.get());
     if (!kExtensions[i].add_clienthello(hs, &extensions, compressed.get(),
@@ -3455,10 +3478,33 @@ bool ssl_add_clienthello_tlsext(SSL_HANDSHAKE *hs, CBB *out, CBB *out_encoded,
   }
 
   bool last_was_empty = false;
-  for (size_t unpermuted = 0; unpermuted < kNumExtensions; unpermuted++) {
-    size_t i = hs->extension_permutation.empty()
+
+  size_t len = kNumExtensions; 
+  size_t custom_len = ssl->config->enable_extensions.size();
+  /**
+   *  如果custom_len>0 说明有设置，使用新逻辑。
+   *  for_size 循环次数
+   */
+  size_t for_size = custom_len > 0 ? custom_len:len;
+  for (size_t unpermuted = 0; unpermuted < for_size; unpermuted++) {
+    size_t i = unpermuted;
+    // 如果custom_len > 0  说明需要自定义顺序实现指定jar3指纹
+    if( custom_len > 0 ) {
+      unsigned ext_index;
+      const struct tls_extension *const ext =
+      tls_extension_find(&ext_index, ssl->config->enable_extensions[unpermuted]);
+      if (ext == NULL) {
+        // 没有找到这个扩展
+        continue;
+      }
+      i = ext_index;      
+    } else {
+      // 判断是否使用随机顺序
+      i = hs->extension_permutation.empty()
                    ? unpermuted
                    : hs->extension_permutation[unpermuted];
+    }
+
     const size_t len_before = CBB_len(&extensions);
     if (!kExtensions[i].add_clienthello(hs, &extensions, &extensions, type)) {
       OPENSSL_PUT_ERROR(SSL, SSL_R_ERROR_ADDING_EXTENSION);

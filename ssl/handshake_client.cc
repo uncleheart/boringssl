@@ -231,6 +231,18 @@ static bool ssl_write_client_cipher_list(const SSL_HANDSHAKE *hs, CBB *out,
       !CBB_add_u16(&child, ssl_get_grease_value(hs, ssl_grease_cipher))) {
     return false;
   }
+  
+  size_t custom_len = ssl->config->enable_cipher.size();
+  /**
+   *  如果custom_len>0 说明有设置，使用新逻辑添加加密套件。
+   */
+  if( custom_len > 0 ) {
+    for (size_t i = 0; i < custom_len; i++) {
+      CBB_add_u16(&child, ssl->config->enable_cipher[i]);
+    }
+    // 直接返回 不继续之后的流程了
+    return true;
+  }
 
   // Add TLS 1.3 ciphers. Order ChaCha20-Poly1305 relative to AES-GCM based on
   // hardware support.

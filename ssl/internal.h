@@ -2977,6 +2977,9 @@ struct SSL_CONFIG {
 
   X509_VERIFY_PARAM *param = nullptr;
 
+  // 启用的扩展
+  GrowableArray<uint16_t> enable_extensions;
+  GrowableArray<uint16_t> enable_cipher;
   // crypto
   UniquePtr<SSLCipherPreferenceList> cipher_list;
 
