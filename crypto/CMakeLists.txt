@@ -233,7 +233,7 @@ add_library(
   base64/base64.c
   bio/bio.c
   bio/bio_mem.c
-  bio/connect.c
+  bio/connect.cc
   bio/fd.c
   bio/file.c
   bio/hexdump.c
