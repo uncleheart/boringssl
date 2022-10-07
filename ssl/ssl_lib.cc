@@ -511,11 +511,15 @@ ssl_ctx_st::ssl_ctx_st(const SSL_METHOD *ssl_method)
       x509_method(ssl_method->x509_method),
       retain_only_sha256_of_client_certs(false),
       quiet_shutdown(false),
-      ocsp_stapling_enabled(false),
-      signed_cert_timestamps_enabled(false),
+      // https://source.chromium.org/chromium/chromium/src/+/main:net/socket/ssl_client_socket_impl.cc;drc=92b34454332a196c590bbf2f45304adbc0d9bcd1;l=888
+      ocsp_stapling_enabled(true),
+      // https://source.chromium.org/chromium/chromium/src/+/main:net/socket/ssl_client_socket_impl.cc;drc=92b34454332a196c590bbf2f45304adbc0d9bcd1;l=887 chromeium 默认打开
+      signed_cert_timestamps_enabled(true),
       channel_id_enabled(false),
-      grease_enabled(false),
-      permute_extensions(false),
+      // https://source.chromium.org/chromium/chromium/src/+/main:net/socket/ssl_client_socket_impl.cc;drc=92b34454332a196c590bbf2f45304adbc0d9bcd1;l=313 chromium 默认打开grease
+      grease_enabled(true),
+      // 随机扩展
+      permute_extensions(true),
       allow_unknown_alpn_protos(false),
       false_start_allowed_without_alpn(false),
       handoff(false),
@@ -676,17 +680,20 @@ SSL *SSL_new(SSL_CTX *ctx) {
 
 SSL_CONFIG::SSL_CONFIG(SSL *ssl_arg)
     : ssl(ssl_arg),
+      // 这个暂时不用开启 默认关闭  https://source.chromium.org/chromium/chromium/src/+/main:net/base/features.cc;drc=a432cd59d51281057ba2a2673ca645a9600bb927;l=113 https://source.chromium.org/chromium/chromium/src/+/main:net/socket/ssl_client_socket_impl.cc;drc=92b34454332a196c590bbf2f45304adbc0d9bcd1;l=910
       ech_grease_enabled(false),
-      signed_cert_timestamps_enabled(false),
+      // chromeium 默认打开 https://source.chromium.org/chromium/chromium/src/+/main:net/socket/ssl_client_socket_impl.cc;drc=92b34454332a196c590bbf2f45304adbc0d9bcd1;l=887 
+      signed_cert_timestamps_enabled(true),
       ocsp_stapling_enabled(false),
       channel_id_enabled(false),
       enforce_rsa_key_usage(false),
       retain_only_sha256_of_client_certs(false),
       handoff(false),
-      shed_handshake_config(false),
+      // chromeium 默认打开 https://source.chromium.org/chromium/chromium/src/+/main:net/socket/ssl_client_socket_impl.cc;drc=92b34454332a196c590bbf2f45304adbc0d9bcd1;l=898
+      shed_handshake_config(true),
       jdk11_workaround(false),
       quic_use_legacy_codepoint(false),
-      permute_extensions(false) {
+      permute_extensions(true) {
   assert(ssl);
 }
 
